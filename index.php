@@ -21,24 +21,15 @@
 
         require "SMailer.php";
 
-        $params = [
-            'server' => [
-                'host' => getenv('smtphost'),
-                'port' => getenv('smtpport'),
-            ],
-            'auth' => [
-                'username' => getenv('smtpuser'),
-                'password' => getenv('smtppassword'),
-            ]
-        ];
+       $mailer = new SMailer(getenv('smtphost'), getenv('smtpport'), getenv('smtpuser'), getenv('smtppassword'));
 
-        $mailer = new SMailer($params);
-        $results = $mailer->send(
-            $_POST['to'],
-            $_POST['from'],
-            $_POST['subject'],
-            $_POST['content']
-        );
+        if($_POST['html']=='on'){
+            $message = $mailer->createHTMLMessage($_POST['to'], $_POST['from'], $_POST['subject'], $_POST['content']);
+        }else{
+            $message = $mailer->createTextMessage($_POST['to'], $_POST['from'], $_POST['subject'], $_POST['content']);
+        }
+
+        $results = $mailer->sendMail($_POST['to'], $_POST['from'], $message);
     }
     ?>
     <form  action="index.php" method="post">
@@ -80,6 +71,12 @@
             <textarea class="form-control" id="content" name="content" aria-describedby="emailHelp"
                       placeholder="Enter email content"></textarea>
             <small id="contentHelp" class="form-text text-muted"></small>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="html" name="html">
+                <label class="form-check-label" for="html">Use content as HTML</label>
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">Send Email</button>
     </form>
